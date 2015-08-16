@@ -1,0 +1,44 @@
+# Maintainer: Charles Bos <charlesbos1 AT gmail>
+# Contributor: Balló György <ballogyor+arch at gmail dot com>
+
+pkgname=indicator-applet
+pkgver=12.10.1
+pkgrel=6
+pkgdesc="Applet to display information from various applications consistently in the panel"
+arch=('i686' 'x86_64')
+url="https://launchpad.net/indicator-applet"
+license=('GPL')
+depends=('gnome-panel' 'libindicator-gtk3' 'xdg-utils'  'gtk3<=3.8')
+makedepends=('intltool' 'gtk-doc')
+optdepends=('indicator-application: take menus from applications and place them in the panel'
+            'indicator-appmenu: host the menus from an application'
+            'indicator-bluetooth: Bluetooth menu'
+            'indicator-datetime: a very, very simple clock'
+            'indicator-messages: a place on the users desktop that collects messages that need a response'
+            'indicator-power: show the power status of your devices'
+            'indicator-printers: show active print jobs'
+            'indicator-session: change your status, switch users'
+            'indicator-sound: a unified sound menu'
+            'indicator-sync: aggregate services performing background synchronization')
+install=$pkgname.install
+source=(https://launchpad.net/indicator-applet/${pkgver%.*}/$pkgver/+download/$pkgname-$pkgver.tar.gz
+        new-bluetooth-indicator.patch)
+md5sums=('f70c7c2952b8acb7e216bfe07a5d8d8e'
+         '3f23ced9e230fa4725a39fd9067eb19b')
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  # Use the new bluetooth-indicator
+  patch -Np1 -i "$srcdir/new-bluetooth-indicator.patch"
+
+  ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libexecdir=/usr/lib/$pkgname \
+              --disable-static
+  make
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  make DESTDIR="$pkgdir/" install
+}
